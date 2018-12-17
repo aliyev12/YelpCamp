@@ -1,8 +1,13 @@
-const express = require('express');
-const request = require('request');
-const bodyParser = require('body-parser');
+const express       = require('express'),
+      app           = express();
+      request       = require('request'),
+      bodyParser    = require('body-parser'),
+      mongoose      = require('mongoose'),
+      env           = require('dotenv').config(); // process.env.DB_PASSWORD etc...
 
-const app = express();
+
+// mongoose.connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0-fxbxa.mongodb.net/${process.env.DB_NAME}`, { useNewUrlParser: true });
+
 
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(express.static('public'));
