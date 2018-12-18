@@ -17,7 +17,7 @@ mongoose.connect(`mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD
 app.use(bodyParser.urlencoded({
     extended: true
 }));
-app.use(express.static('public'));
+app.use(express.static(__dirname + '/public'));
 
 app.set('view engine', 'ejs');
 
@@ -95,5 +95,38 @@ app.get('/campgrounds/:id/comments/new', (req, res) => {
         }
     });
 });
+
+
+app.post('/campgrounds/:id/comments', (req, res) => {
+    // Lookup campground using ID
+    Campground.findById(req.params.id, (err, foundCampground) => {
+        if (err) {
+            console.log(err);
+            res.redirect('/campgrounds');
+        } else {
+            // Create new comment
+            Comment.create(req.body.comment, (err, comment) => {
+                if (err) {
+                    console.log(err);
+                    res.redirect('/campgrounds');
+                } else {
+                    // Connect new comment to campground
+                    foundCampground.comments.push(comment);
+                    foundCampground.save((err, campground) => {
+                        if (err) {
+                            console.log(err);
+                        } else {
+                            // Redirect to campground show
+                            console.log(campground);
+                            res.redirect(`/campgrounds/${campground._id}`);
+                        }
+                    });
+                }
+            });
+        }
+    });
+});
+
+
 
 app.listen(3000, '127.0.0.1', () => console.log('Server running...'));
