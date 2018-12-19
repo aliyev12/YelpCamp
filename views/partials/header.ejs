@@ -17,15 +17,21 @@
         <a href="/" class="navbar-brand">YelpCamp</a>
         <div class="collapse navbar-collapse">
             <ul class="navbar-nav ml-auto">
+                <% if (!currentUser) { %>
                 <li class="nav-item">
                     <a class="nav-link" href="/login">Login</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/register">Signup</a>
                 </li>
+                <% } else { %>
+                <li class="nav-item">
+                    <span class="nav-link" href="#">Signed in as: <strong class="pl-2 pr-5"><%= currentUser.username %></strong></span>
+                </li>
                 <li class="nav-item">
                     <a class="nav-link" href="/logout">Logout</a>
                 </li>
+                <% } %>
             </ul>
         </div>
     </nav>
