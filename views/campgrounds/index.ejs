@@ -17,17 +17,12 @@
             <div class="card mb-5">
                 <img class="card-img-top" src="<%= campground.image %>" alt="" />
                 <div class="card-body">
-                    <h4 class="card-title"><%= campground.name %></h4>
-                    <!-- <p class="card-text">Lorem</p>  -->
+                    <h4 class="card-title">
+                        <%= campground.name %>
+                    </h4>
                     <a href="/campgrounds/<%= campground._id %>" class="btn btn-outline-dark btn-block">More Info</a>
                 </div>
             </div>
-            <% campground.comments.forEach((comment, i) => { %>
-                <p>Author: <%= comment.author %></p>
-                <p>Text: <%= comment.text %></p>
-                <hr>
-           <% }) %>
-
         </div>
         <% }); %>
     </div>
