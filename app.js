@@ -16,6 +16,7 @@ const express = require("express"),
 // Requiring routes
 const campgroundRoutes = require("./routes/campgrounds"),
   commentRoutes = require("./routes/comments"),
+  reviewRoutes = require('./routes/reviews'),
   indexRoutes = require("./routes/index");
 // // For development only, prepopulate sample data
 // seedDB();
@@ -68,6 +69,7 @@ app.use((req, res, next) => {
 app.use(indexRoutes);
 app.use('/campgrounds', campgroundRoutes);
 app.use('/campgrounds/:id/comments', commentRoutes);
+app.use('/campgrounds/:id/reviews', reviewRoutes);
 
 
 /*== RUN SERVER ==*/
