@@ -1,11 +1,54 @@
 <% include ./partials/header %>
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <h1 class="text-center">Sign Up</h1>
+        <div class="my-3 mx-auto signup-login-form-container">
+            <form action="/register" method="POST">
+                <div class="form-group">
+                    <label for="firstName">First Name</label>
+                    <input type="text" name="firstName" class="form-control" placeholder="First Name">
+                </div>
+                <div class="form-group">
+                    <label for="lastName">Last Name</label>
+                    <input type="text" name="lastName" class="form-control" placeholder="Last Name">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" name="email" id="email" placeholder="Email Address" class="form-control">
+                </div>
+                <div class="form-group required">
+                    <label for="username">Username</label>
+                    <input class="form-control" type="text" name="username" placeholder="Username" required>
+                </div>
+                <div class="form-group required">
+                    <label for="password">Password</label>
+                    <input class="form-control" type="password" name="password" placeholder="Password" required>
+                </div>
+                <div class="form-group required">
+                    <label for="confirm-password">Confirm</label>
+                    <input type="password" name="confirmPassword" id="confirmPassword" class="form-control" placeholder="Confirm Password" required>
+                </div>
+                <div class="form-group">
+                    <label for="avatar">Avatar</label>
+                    <input type="text" class="form-control" name="avatar" placeholder="https://source.unsplash.com/600x609?pokemon" value="https://source.unsplash.com/600x609?pokemon">
+                </div>
+                <div class="form-group">
+                    <label for="adminCode">Admin Code</label>
+                    <input type="text" class="form-control" name="adminCode" placeholder="Admin Code">
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-lg btn-primary btn-block" type="submit">Sign Up</button>
+                </div>
+            </form>
+            <a href="/campgrounds" class="btn btn-link"><i class="fa fa-arrow-left mr-2" aria-hidden="true"></i>Go Back</a>
+        </div>
+        </div>
+        
+    </div>
+</div>
 
-    <h1>Sign Up!</h1>
 
-    <form action="/register" method="POST">
-        <input type="text" name="username" placeholder="Username">
-        <input type="password" name="password" placeholder="Password">
-        <button type="submit">Sign Up</button>
-    </form>
+
 
 <% include ./partials/footer %>

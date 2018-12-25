@@ -5,11 +5,12 @@ const express = require("express"),
   mongoose = require("mongoose"),
   flash = require('connect-flash'),
   passport = require("passport"),
+  cookieParser = require("cookie-parser"),
   LocalStrategy = require("passport-local"),
   env = require("dotenv").config(), // process.env.DB_PASSWORD etc...
   Campground = require("./models/campground"),
   Comment = require("./models/comment"),
-  seedDB = require("./seeds"),
+  seedDB = require("./seeds")
   methodOverride = require('method-override'),
   User = require("./models/user");
 
@@ -42,6 +43,9 @@ app.use(methodOverride('_method'));
 // Make it so that you don't have you type .ejs extentions for render pages
 app.set("view engine", "ejs");
 app.use(flash());
+app.use(cookieParser('secret'));
+//require moment
+app.locals.moment = require('moment');
 
 /*== PASSPORT CONFIG ==*/
 app.use(
@@ -73,4 +77,4 @@ app.use('/campgrounds/:id/reviews', reviewRoutes);
 
 
 /*== RUN SERVER ==*/
-app.listen(3000, "127.0.0.1", () => console.log("Server running..."));
+app.listen(process.env.PORT, process.env.IP, () => console.log("Server running..."));
