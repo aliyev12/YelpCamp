@@ -16,6 +16,10 @@ router.post(
         const newUser = new User({
             username: req.body.username
         });
+        if (req.body.adminCode === 'secretcode123') {
+            newUser.isAdmin = true;
+        }
+        // eval(require('locus'));
         User.register(newUser, req.body.password, (err, user) => {
             if (err || !user) {
                 req.flash('error', err.message);

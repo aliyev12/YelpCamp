@@ -3,7 +3,7 @@
 <div class="container">
     <header class="jumbotron">
         <div class="container">
-            <h1>Welcome to YelpCamp!</h1>
+            <h1><i class="fas fa-campground mr-2"></i>Welcome to YelpCamp!</h1>
             <p>View our hand-picked campgrounds from all over the world</p>
             <p>
                 <a class="btn btn-primary btn-lg" href="/campgrounds/new">Add New Campground</a>
@@ -11,7 +11,7 @@
         </div>
     </header>
 
-    <div class="row text-center" style="display: flex; flex-wrap: wrap;">
+    <div class="row text-center d-flex flex-wrap">
         <% campgrounds.forEach(campground => { %>
         <div class="col-md-3 col-sm-6">
             <div class="card mb-5">
@@ -20,11 +20,127 @@
                     <h4 class="card-title">
                         <%= campground.name %>
                     </h4>
-                    <a href="/campgrounds/<%= campground._id %>" class="btn btn-outline-dark btn-block">More Info</a>
+                    <% if (campground.rating === 0) { %>
+                    <em>No reviews yet.</em>
+                    <% } else { %>
+                    <span class="fa fa-star checked"></span>
+                    <span class="fa fa-star <% if (campground.rating > 1.5) { %> checked <% } %>"></span>
+                    <span class="fa fa-star <% if (campground.rating > 2.5) { %> checked <% } %>"></span>
+                    <span class="fa fa-star <% if (campground.rating > 3.5) { %> checked <% } %>"></span>
+                    <span class="fa fa-star <% if (campground.rating > 4.5) { %> checked <% } %>"></span>
+                    <% } %>
                 </div>
+                <p>
+                    <a href="/campgrounds/<%= campground._id %>" class="btn btn-outline-dark">More Info</a>
+                </p>
             </div>
         </div>
         <% }); %>
+    </div>
+
+
+
+
+
+    <!-- PAGINATION -->
+    <div class="row text-center">
+        <!-- Check if pages is defined or more than 0 -->
+        <% if (pages && pages > 0) { %>
+        <ul class="pagination text-center">
+            <!-- If current page number passed through router is 1 -->
+            <% if (parseInt(current) === 1) { %>
+            <!-- Show a greyed out First button that doesn't do anything -->
+            <li class="page-item disabled">
+                <a class="page-link">First</a>
+            </li>
+            <% } else { %>
+            <!-- Show First button that taked to page 1 -->
+            <li class="page-item">
+                <a href="/campgrounds?per_page=<%= perPage %>&page=1" class="page-link">First</a>
+            </li>
+            <% } %>
+
+            <!-- If current page is 1 -->
+            <% if (parseInt(current) === 1) { %>
+            <!-- Only show a greyed out back arrow that dous't do anything -->
+            <li class="page-item disabled">
+                <a class="page-link">«</a>
+            </li>
+            <% } else { %>
+            <!-- Show back arrow that taked to one page before current page -->
+            <li class="page-item">
+                <a href="/campgrounds?per_page=<%= perPage %>&page=<%= Number(current) - 1 %>" class="page-link">«</a>
+            </li>
+            <% } %>
+
+            <!-- Create i variable that will be 1 if current page is less than 5, and whatever the current page is if it is more than 5 -->
+            <% let i = (Number(current) > 5 ? Number(current) : 1) %>
+            <!-- If current page is more than 5 AKA i is not equal 1 -->
+            <% if (i !== 1) { %>
+            <!-- Display 3 dots and have them be greyed out -->
+            <li class="page-item disabled">
+                <a class="page-link">...</a>
+            </li>
+            <% } %>
+            <!-- Loop  either whatever current page number + 4 times and no more that total number of pages times -->
+            <% for (; i <= (Number(current) + 4) && i <= pages; i++) { %>
+            <% if (i === parseInt(current)) { %>
+            <li class="page-item active">
+                <a class="page-link">
+                    <%= i %></a>
+            </li>
+            <% } else { %>
+            <li class="page-item">
+                <a href="/campgrounds?per_page=<%= perPage %>&page=<%= i %>" class="page-link">
+                    <%= i %></a>
+            </li>
+            <% } %>
+            <% if (i === parseInt(current) + 4 && i < pages) { %>
+            <li class="page-item disabled">
+                <a class="page-link">...</a>
+            </li>
+            <% } %>
+            <% } %>
+
+            <% if (parseInt(current) === parseInt(pages)) { %>
+            <li class="page-item disabled">
+                <a class="page-link">»</a>
+            </li>
+            <% } else { %>
+            <li class="page-item">
+                <a href="/campgrounds?per_page=<%= perPage %>&page=<%= Number(current) + 1 %>" class="page-link">»</a>
+            </li>
+            <% } %>
+
+            <% if (parseInt(current) === parseInt(pages)) { %>
+            <li class="page-item disabled">
+                <a class="page-link">Last</a>
+            </li>
+            <% } else { %>
+            <li class="page-item">
+                <a href="/campgrounds?per_page=<%= perPage %>&page=<%= parseInt(pages) %>" class="page-link">Last</a>
+            </li>
+            <% } %>
+        </ul>
+        <% } %>
+
+        <!-- Choose number of campgrounds per page -->
+        <div class="dropdown ml-4">
+            <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-expanded="false" title="Number of campgrounds per page">
+                Per Page
+            </button>
+            <div class="dropdown-menu" x-placement="bottom-start" style="position: absolute; will-change: transform; top: 0px; left: 0px; transform: translate3d(0px, 38px, 0px);">
+                <a class="dropdown-item" href="/campgrounds?per_page=4">4</a>
+                <a class="dropdown-item" href="/campgrounds?per_page=6">6</a>
+                <a class="dropdown-item" href="/campgrounds?per_page=8">8</a>
+                <a class="dropdown-item" href="/campgrounds?per_page=12">12</a>
+                <a class="dropdown-item" href="/campgrounds?per_page=16">16</a>
+                <a class="dropdown-item" href="/campgrounds?per_page=20">20</a>
+                <a class="dropdown-item" href="/campgrounds?per_page=50">50</a>
+                <a class="dropdown-item" href="/campgrounds?per_page=100">100</a>
+                <a class="dropdown-item" href="/campgrounds?per_page=<%= totalNumberOfCampgrounds %>">All</a>
+            </div>
+        </div>
     </div>
 </div>
 

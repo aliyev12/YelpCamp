@@ -3,20 +3,30 @@
 <div class="container">
     <div class="row">
         <div class="col">
-            <h1 class="text-center">Edit <%= campground.name %></h1>
+            <h1 class="text-center">Edit
+                <%= campground.name %>
+            </h1>
             <div class="mx-auto my-4 w-50">
                 <form action="/campgrounds/<%= campground._id %>?_method=PUT" method="POST">
                     <div class="form-group">
-                        <input class="form-control" value="<%= campground.name %>" type="text" name="campground[name]" placeholder="Name">
+                        <input class="form-control" value="<%= campground.name %>" type="text" name="campground[name]"
+                            placeholder="Name">
                     </div>
                     <div class="form-group">
-                        <input type="number" value="<%= campground.price %>" class="form-control" name="campground[price]" placeholder="Price" min="0.01" step="0.01">
+                        <input type="number" value="<%= campground.price %>" class="form-control" name="campground[price]"
+                            placeholder="Price" min="0.01" step="0.01">
                     </div>
                     <div class="form-group">
-                        <input class="form-control" value="<%= campground.image %>" type="text" name="campground[image]" placeholder="Image URL">
+                        <input class="form-control" value="<%= campground.image %>" type="text" name="campground[image]"
+                            placeholder="Image URL">
                     </div>
                     <div class="form-group">
-                        <input class="form-control" value="<%= campground.description %>" type="text" name="campground[description]" placeholder="Description">
+                        <input class="form-control" value="<%= campground.description %>" type="text" name="campground[description]"
+                            placeholder="Description">
+                    </div>
+                    <div class="form-group">
+                        <label for="location">Location</label>
+                        <input type="text" class="form-control" name="location" id="location" placeholder="Yosemite National Park, CA" value="<%= campground.location %>">
                     </div>
                     <button type="submit" class="btn btn-primary btn-block">Submit!</button>
                 </form>

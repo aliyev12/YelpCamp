@@ -1,0 +1,30 @@
+.review-text {
+    word-wrap: break-word;
+}
+
+.checked {
+    color: orange;
+}
+
+#already-left-review {
+    visibility: hidden;
+}
+
+#edit-comment-card {
+    border-left: 5px solid #ffbb33;
+}
+
+/*Google Maps*/
+#map {
+    height: 400px;
+    width: 100%;
+}
+
+.signup-login-form-container {
+    max-width: 500px;
+}
+
+.form-group.required label:after {
+    content:" *";
+    color:red;
+  }
