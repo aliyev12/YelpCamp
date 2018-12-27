@@ -24,15 +24,33 @@ const geocoder = NodeGeocoder(options);
 
 // INDEX - Show all campgrounds
 router.get("/", (req, res) => {
+    // Declare a variable that will hold find option for pulling campgrounds
+    let regex;
+    // If there is a search query...
+    if (req.query.search) {
+        //... set regex that does searching based on names
+        regex = {
+            name: new RegExp(escapeRegex(req.query.search), 'gi')
+        };
+    // If there isn't a search query in URL, just set regex to be an empty object
+    } else {
+        regex = {};
+    }
 
     // Count total number of campgrounds
-    Campground.count().exec((err, count) => {
-        if (err || !count) {
+    Campground.count(regex).exec((err, count) => {
+        if (err) {
             req.flash('error', err.message);
             res.redirect('/');
-        } else {
-
-            const perPageAllowedValues = [4, 6, 8, 12, 16, 20, 50, 100, parseInt(count)];
+        }
+        //  else if (!count) {
+        //     if (req.query.search) {
+        //         req.flash('error', 'test');
+        //         res.redirect('/campgrounds');
+        //     }
+        // } 
+        else {
+            const perPageAllowedValues = [1, 4, 6, 8, 12, 16, 20, 50, 100, parseInt(count)];
             const validatePerPageQuery = perPageAllowedValues.some(el => el === parseInt(req.query.per_page));
             // If someone tries to modify URL per_page query, display error and redirect to landing page
             if (req.query.per_page && !validatePerPageQuery) {
@@ -48,6 +66,7 @@ router.get("/", (req, res) => {
                 if (perPageQuery > 0 && perPageQuery <= parseInt(count)) {
                     perPage = perPageQuery
                 } else {
+                    // Just display all campgrounds
                     perPage = parseInt(count);
                 }
             } else {
@@ -62,34 +81,48 @@ router.get("/", (req, res) => {
             // Get page number query
             const pageQuery = parseInt(req.query.page),
                 pageNumber = pageQuery ? pageQuery : 1;
-            // Get all campgrounds from DB
-            Campground.find({})
-                .skip((perPage * pageNumber) - perPage)
-                .limit(perPage)
-                .populate("comments")
-                .exec((err, allCampgrounds) => {
-                    if (err || !allCampgrounds) {
-                        req.flash('error', 'Campgrounds not found');
-                        console.log(err.message);
-                        res.redirect('/');
-                    } else {
-                        // If someone tries to modiry URL page query to a non existant page, display error and redirect to landing page
-                        if (parseInt(req.query.page) > Math.ceil(count / perPage) || parseInt(req.query.page) <= 0) {
-                            req.flash('error', `Don't try modifying URL. Use pagination to get to the right page`);
-                            return res.redirect('/');
+
+                /**================== */
+                // Get all campgrounds from DB
+                Campground.find(regex)
+                    .skip((perPage * pageNumber) - perPage)
+                    .limit(perPage)
+                    .populate("comments")
+                    .exec((err, allCampgrounds) => {
+                        if (err) {
+                            console.log(err);
+                            req.flash('error', 'Something went wrong');
+                            res.redirect('/campgrounds');
+                        } else if (!allCampgrounds) {
+                            req.flash('error', 'No campgrounds matched your search');
+                            res.redirect('/campgrounds');
+                        } else {
+                            // If someone tries to modiry URL page query to a non existant page, display error and redirect to landing page
+                            if (parseInt(req.query.page) > Math.ceil(count / perPage) || parseInt(req.query.page) <= 0) {
+                                req.flash('error', `Don't try modifying URL. Use pagination to get to the right page`);
+                                return res.redirect('/');
+                            }
+                            // Object with all variables that are being passed on to Campground's index page
+                            const dataBeingPassedToCampgroundIndexTemplate = {
+                                campgrounds: allCampgrounds,
+                                current: pageNumber,
+                                pages: Math.ceil(count / perPage),
+                                totalNumberOfCampgrounds: count,
+                                perPage
+                            };
+                            // If there is a search query, add it to object
+                            if (req.query.search) {
+                                dataBeingPassedToCampgroundIndexTemplate.search = req.query.search;
+                            } else {
+                                dataBeingPassedToCampgroundIndexTemplate.search = '';
+                            }
+                            // Render index page and pass on object with parameters below
+                            res.render("campgrounds/index", dataBeingPassedToCampgroundIndexTemplate);
                         }
-                        // Render index page and pass on object with parameters below
-                        res.render("campgrounds/index", {
-                            campgrounds: allCampgrounds,
-                            current: pageNumber,
-                            pages: Math.ceil(count / perPage),
-                            totalNumberOfCampgrounds: count,
-                            perPage
-                        });
-                    }
-                });
-        }
-    });
+                    }); // end find
+            
+        } // end if Campground.count no errors
+    }); // count used to end
 });
 
 // CREATE - Create new campground
@@ -111,7 +144,9 @@ router.post("/", middleware.isLoggedIn, (req, res) => {
         }
         const lat = data[0].latitude,
             lng = data[0].longitude,
-            location = data[0].formattedAddress;
+            location = data[0].formattedAddress,
+            city = data[0].city,
+            country = data[0].country;
 
         const newCampground = {
             name,
@@ -121,7 +156,9 @@ router.post("/", middleware.isLoggedIn, (req, res) => {
             author,
             location,
             lat,
-            lng
+            lng,
+            city,
+            country
         };
 
         // Create a new campground and save to database
@@ -205,12 +242,12 @@ router.put('/:id', middleware.checkCampgroundOwnership, (req, res) => {
                         req.flash('error', 'Invalid Address');
                         return res.redirect('back');
                     }
-                    console.log(data);
                     req.body.campground.lat = data[0].latitude;
                     req.body.campground.lng = data[0].longitude;
                     req.body.campground.location = data[0].formattedAddress;
                     req.body.campground.city = data[0].city;
-
+                    req.body.campground.country = data[0].country;
+                    // eval(require('locus'));
                     // Find and update the correct campground
                     Campground.findByIdAndUpdate(req.params.id, req.body.campground, (err, updatedCampground) => {
                         if (err) {
@@ -284,4 +321,14 @@ router.delete('/:id', middleware.checkCampgroundOwnership, (req, res) => {
     });
 });
 
+function escapeRegex(text) {
+    return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&');
+}
+
+
+
+
+/**=================== */
+/**=================== */
+/**=================== */
 module.exports = router;

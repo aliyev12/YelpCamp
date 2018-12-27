@@ -23,7 +23,7 @@
             aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
-        <div class="collapse navbar-collapse"  id="navbarNav">
+        <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item">
                     <a class="nav-link mr-auto ml-0" href="/campgrounds">Home</a>
@@ -38,10 +38,25 @@
                     <a class="nav-link" href="/register">Signup</a>
                 </li>
                 <% } else { %>
-                <li class="nav-item">
+                <li class="nav-item <% if(currentUser && currentUser.isAdmin) { %>  border border-warning <% } %>">
                     <span class="nav-link" href="#">Signed in as: <strong class="pl-2 pr-5">
-                            <%= currentUser.username %></strong></span>
+                            <a href="/users/<%= currentUser._id %>">
+                                <%= currentUser.username %></a></strong></span>
                 </li>
+                <% if (currentUser && currentUser.isAdmin) { %>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false">
+                        <i class="fas fa-tools mr-2"></i> Admin Tools
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <a class="dropdown-item" href="/users">Users</a>
+                        <!-- <a class="dropdown-item" href="#">Another action</a>
+                            <div class="dropdown-divider"></div>
+                            <a class="dropdown-item" href="#">Something else here</a> -->
+                    </div>
+                </li>
+                <% } %>
                 <li class="nav-item">
                     <a class="nav-link" href="/logout">Logout</a>
                 </li>
