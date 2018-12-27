@@ -23,8 +23,13 @@
                     <p class="card-text">
                         <%= campground.description %>
                     </p>
-                    <footer class="blockquote-footer">Submitted by <cite title="Source Title">
-                            <%= campground.author.username %></cite></footer>
+                    <footer class="blockquote-footer">Submitted by 
+                        <a href="/users/<%= campground.author.id %>">
+                            <cite title="Source Title">
+                                <%= campground.author.username %>
+                            </cite>
+                        </a>
+                    </footer>
                     <!-- Check if user is logged in AND the user is the author of the campground -->
                     <% if(currentUser && campground.author.id.equals(currentUser._id) || currentUser && currentUser.isAdmin) { %>
                     <a class="btn btn-warning mt-3 text-white btn-sm" href="/campgrounds/<%= campground._id %>/edit">Edit</a>

@@ -1,0 +1,63 @@
+<% include ../partials/header %>
+
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <h1>
+                <%= `${user.firstName} ${user.lastName}` %>
+            </h1>
+            <a href="/users/<%= user._id %>/edit" class="btn btn-outline-dark my-3"><i class="fas fa-user-edit mr-2"></i>Edit Account</a>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <img src="<%= user.avatar %>" alt="User Profile Image" class="card-img-top mx-auto mt-3" id="user-profile-avatar">
+                <div class="card-body">
+                    <h6 class="card-title">
+                        <a href="mailto:<%= user.email %>">
+                            <%= user.email %>
+                        </a>
+                    </h6>
+                    <!-- <h4 class="card-title">Card Title</h4>
+                            <h6 class="card-subtitle text-muted">Card subtitle</h6> -->
+                    <p class="card-text">
+                        <%= user.description %>
+                    </p>
+                    <!-- <a class="btn btn-outline-primary" href="#">Read More</a> -->
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <h3 class="mb-4">
+                <%= user.username %>'s campgrounds</h3>
+            <ul class="list-unstyled">
+                <% campgrounds.forEach(campground => { %>
+                <li class="media mb-5">
+                    <img class="mr-3 user-profile-image" src="<%= campground.image %>" alt="<%= campground.name %>">
+                    <div class="media-body">
+                        <a href="/campgrounds/<%= campground._id %>">
+                            <h4 class="mt-0 mb-2">
+                                <%= campground.name %>
+                            </h4>
+                        </a>
+                        <p class="text-muted font-italic">
+                            <% if (campground.city && campground.country) { %>
+                            <%= `${campground.city}, ${campground.country}` %>
+                            <% } else { %>
+                            <%= campground.location %>
+                            <% }%>
+                        </p>
+                        <p class="lead">
+                            <%= campground.description %>
+                        </p>
+                    </div>
+                </li>
+                <% }) %>
+            </ul>
+        </div>
+    </div>
+</div>
+
+
+<% include ../partials/footer %>

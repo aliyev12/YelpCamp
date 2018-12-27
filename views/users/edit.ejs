@@ -1,0 +1,72 @@
+<% include ../partials/header %>
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <h1 class="text-center">Edit
+                <%= user.username %>'s profile</h1>
+            <div class="my-3 mx-auto signup-login-form-container">
+                <form action="/users/<%= user._id %>?_method=PUT" method="POST">
+                    <div class="form-group">
+                        <label for="firstName">First Name</label>
+                        <input value="<%= user.firstName %>" type="text" name="firstName" class="form-control"
+                            placeholder="First Name">
+                    </div>
+                    <div class="form-group">
+                        <label for="lastName">Last Name</label>
+                        <input value="<%= user.lastName %>" type="text" name="lastName" class="form-control"
+                            placeholder="Last Name">
+                    </div>
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input value="<%= user.email %>" type="email" name="email" id="email" placeholder="Email Address"
+                            class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label for="username">Username</label>
+                        <input value="<%= user.username %>" class="form-control" type="text" name="username"
+                            placeholder="Username">
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input class="form-control" type="password" name="password" placeholder="Password">
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm-password">Confirm</label>
+                        <input type="password" name="confirmPassword" id="confirmPassword" class="form-control"
+                            placeholder="Confirm Password">
+                    </div>
+                    <div class="form-group">
+                        <label for="avatar">Avatar</label>
+                        <input value="<%= user.avatar %>" type="text" class="form-control" name="avatar" placeholder="https://source.unsplash.com/600x609?pokemon"
+                            value="https://source.unsplash.com/600x609?pokemon">
+                    </div>
+                    <div class="form-group">
+                        <label for="adminCode">Admin Code</label>
+                        <input value="<%= user.isAdmin %>" type="text" class="form-control" name="adminCode"
+                            placeholder="Leave blank if you don't have it">
+                    </div>
+                    <div class="form-group">
+                        <label for="description">Tell us about yourself</label>
+                        <textarea type="text" class="form-control" max="300" name="description" row="3" placeholder="Hey there, I'm John Doe and I'm from Brooklyn..."><%= user.description %></textarea>
+                    </div>
+                    <% if (currentUser.isAdmin) { %>
+                    <div class="form-group">
+                        <label for="accountStatus">Account Status</label>
+                        <select class="custom-select" name="enabled" id="accountStatus">
+                            <option value="true" <% if (user.enabled || user.enabled === undefined) { %> selected <% } %> >Enabled</option>
+                            <option value="false" <% if (!user.enabled) { %> selected <% } %> >Disabled</option>
+                        </select>
+                    </div>
+                    <% } %>
+                    <div class="form-group">
+                        <button class="btn btn-lg btn-primary btn-block" type="submit">Submit</button>
+                    </div>
+                </form>
+                <a href="<% if (currentUser && currentUser.isAdmin) { %>/users<% } else { %>/campgrounds<% } %>" class="btn btn-link"><i
+                        class="fa fa-arrow-left mr-2" aria-hidden="true"></i>Go Back</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<% include ../partials/footer %>

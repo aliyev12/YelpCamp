@@ -18,9 +18,14 @@ const express = require("express"),
 const campgroundRoutes = require("./routes/campgrounds"),
   commentRoutes = require("./routes/comments"),
   reviewRoutes = require('./routes/reviews'),
-  indexRoutes = require("./routes/index");
+  indexRoutes = require("./routes/index"),
+  userRoutes = require('./routes/users'),
+  forgotPasswordRoutes = require('./routes/forgot-password');
+
 // // For development only, prepopulate sample data
 // seedDB();
+
+
 // Connect to mango database
 mongoose.connect(
   `mongodb+srv://${process.env.DB_USER}:${
@@ -71,9 +76,11 @@ app.use((req, res, next) => {
 
 // Use required route files
 app.use(indexRoutes);
+app.use(forgotPasswordRoutes);
 app.use('/campgrounds', campgroundRoutes);
 app.use('/campgrounds/:id/comments', commentRoutes);
 app.use('/campgrounds/:id/reviews', reviewRoutes);
+app.use('/users', userRoutes);
 
 
 /*== RUN SERVER ==*/

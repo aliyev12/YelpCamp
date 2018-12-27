@@ -1,10 +1,21 @@
 const express = require("express"),
     router = express.Router(),
+    env = require("dotenv").config(), // process.env.DB_PASSWORD etc...
     passport = require('passport'),
-    User = require('../models/user')
+    middleware = require('../middleware/index'),
+    User = require('../models/user'),
+    Campground = require('../models/campground');
+
 
 // Root route
-router.get("/", (req, res) => res.render("landing"));
+router.get("/", (req, res) => {
+    if (req.user) {
+        console.log(`${req.user.username} just visited the site.`)
+    } else {
+        console.log(`${req.connection.remoteAddress} just visited the site.`);
+    }
+    res.render("landing");
+});
 
 // Show register form
 router.get("/register", (req, res) => res.render("register"));
@@ -13,24 +24,38 @@ router.get("/register", (req, res) => res.render("register"));
 router.post(
     "/register",
     (req, res) => {
-        const newUser = new User({
-            username: req.body.username
-        });
-        if (req.body.adminCode === 'secretcode123') {
-            newUser.isAdmin = true;
-        }
-        // eval(require('locus'));
-        User.register(newUser, req.body.password, (err, user) => {
-            if (err || !user) {
-                req.flash('error', err.message);
-                res.render("register");
-            } else {
-                passport.authenticate("local")(req, res, () => {
-                    req.flash('success', `Welcome to YelpCamp ${user.username}!`);
-                    res.redirect("/campgrounds");
-                });
+        // With locus, heck what data you receive from req.body before inserting anything into database
+        //eval(require('locus'));
+
+        if (req.body.password === req.body.confirmPassword) {
+            const newUser = new User({
+                firstName: req.body.firstName,
+                lastName: req.body.lastName,
+                email: req.body.email,
+                username: req.body.username,
+                avatar: req.body.avatar,
+                description: req.body.description
+            });
+
+            if (req.body.adminCode === 'secretcode123') {
+                newUser.isAdmin = true;
             }
-        });
+
+            User.register(newUser, req.body.password, (err, user) => {
+                if (err || !user) {
+                    req.flash('error', err.message);
+                    res.render("register");
+                } else {
+                    passport.authenticate("local")(req, res, () => {
+                        req.flash('success', `Welcome to YelpCamp ${user.username}!`);
+                        res.redirect("/campgrounds");
+                    });
+                }
+            });
+        } else {
+            req.flash('error', `Passwords you've entered didn't match, please try again.`);
+            res.redirect('/register');
+        }
     }
 );
 
@@ -40,9 +65,12 @@ router.get("/login", (req, res) => res.render("login"));
 // Handling login logic
 router.post(
     "/login",
+    middleware.checkIfUserIsEnabled,
     passport.authenticate("local", {
         successRedirect: "/campgrounds",
-        failureRedirect: "/login"
+        successFlash: 'You have been successfully authenticated!',
+        failureRedirect: "/login",
+        failureFlash: true
     }),
     (req, res) => {}
 );

@@ -1,6 +1,7 @@
 const Campground = require("../models/campground"),
     Comment = require("../models/comment"),
-    Review = require('../models/review');
+    Review = require('../models/review'),
+    User = require('../models/user');
 
 const middlewareObj = {};
 
@@ -120,12 +121,61 @@ middlewareObj.checkReviewOwnership = function (req, res, next) {
 
 };
 
+middlewareObj.checkUserProfileOwnership = function (req, res, next) {
+    // Check if user is logged in
+    if (req.isAuthenticated()) {
+        User.findById(req.params.user_id, (err, user) => {
+            if (err || !user) {
+                req.flash('error', 'User not found (Error code: MDL-CHUOW-01)');
+                res.redirect('/campgrounds');
+            } else {
+                // Check if user ID is the same as the currently logged in user ID
+                if (user._id.equals(req.user._id) || req.user.isAdmin) {
+                    next();
+                } else {
+                    // User is not the owner of profile, so the user is not authorized to modify it
+                    req.flash('error', `You don't have permission to do that`);
+                    res.redirect(`/`);
+                }
+            }
+        });
+    } else {
+        // User is not logged in, so display error message and redirect to login page
+        req.flash('err', 'You need to be logged in to do that');
+        res.redirect('/login');
+    }
+};
+
 middlewareObj.isLoggedIn = function (req, res, next) {
     if (req.isAuthenticated()) {
         return next();
     }
     req.flash("error", "You need to be logged in to do that");
     res.redirect("/login");
+};
+
+middlewareObj.checkIfUserIsAdmin = function (req, res, next) {
+    if (req.isAuthenticated() && req.user.isAdmin) {
+        return next();
+    }
+    req.flash("error", "You don't have permission to view this page");
+    res.redirect("/");
+};
+
+middlewareObj.checkIfUserIsEnabled = function (req, res, next) {
+    User.findOne({username: req.body.username}, (err, user) => {
+        if (err || !user) {
+            req.flash('error', 'User not found');
+            res.redirect('/login');
+        } else {
+            if (user.enabled) {
+                next();
+            } else {
+                req.flash('error', 'Your account is disabled. Please, contact your administrator.');
+                res.redirect('/login');
+            }
+        }
+    });
 };
 
 module.exports = middlewareObj;
