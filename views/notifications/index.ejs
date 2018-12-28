@@ -1,0 +1,43 @@
+<% include ../partials/header %>
+
+<div class="container">
+    <div class="row">
+        <div class="col">
+            <h1>Notifications</h1>
+            <% if (allNotifications && allNotifications.length === 0) { %>
+            <div class="alert alert-info mx-auto" role="alert">
+                There are currently no Notifications.
+            </div>
+            <% } else { %>
+            <% allNotifications.forEach(notification => { %>
+            <div class="card <%= notification.isRead ? 'border-secondary' : 'border-success' %> mb-3">
+                <div class="card-body">
+                    <div class="d-flex">
+                        <div class="mr-auto">
+                            <a href="/campgrounds/<%= notification.campgroundId %>">
+                                <h4 class="card-title">
+                                        <% if (!notification.isRead) { %><i class="fas fa-circle text-success mr-2"></i><% } %> <%= notification.username %> created a new campground</h4>
+                            </a>
+                        </div>
+                        <div>
+                            <% if (notification.isRead) { %>
+                            <a class="btn btn-secondary btn-sm" href="/notifications/<%= notification.id %>?mark_read=false">Mark
+                                as unread</a>
+                            <% } else { %>
+                            <a class="btn btn-secondary btn-sm" href="/notifications/<%= notification.id %>?mark_read=true">Mark
+                                as read</a>
+                            <% } %>
+                        </div>
+                    </div>
+                    <p class="card-text"><small>
+                            <%= moment(notification.createdAt).fromNow() %></small></p>
+                </div>
+            </div>
+            <% }); %>
+            <% } %>
+
+        </div>
+    </div>
+</div>
+
+<% include ../partials/footer %>

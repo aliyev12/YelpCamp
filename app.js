@@ -67,8 +67,18 @@ passport.serializeUser(User.serializeUser());
 passport.deserializeUser(User.deserializeUser());
 
 // Pass on currnetUser to each route
-app.use((req, res, next) => {
+app.use(async (req, res, next) => {
     res.locals.currentUser = req.user;
+    if (req.user) {
+        try {
+            const user = await User.findById(req.user._id).populate('notifications', null, { isRead: false }).exec();
+            res.locals.notifications = user.notifications.reverse();
+        }
+        catch(err) {
+            req.flash('error', err.message);
+            res.redirect('/campgrounds');
+        }
+    }
     res.locals.error = req.flash('error');
     res.locals.success = req.flash('success');
     next();

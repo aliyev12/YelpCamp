@@ -4,7 +4,8 @@ const express = require("express"),
     passport = require('passport'),
     middleware = require('../middleware/index'),
     User = require('../models/user'),
-    Campground = require('../models/campground');
+    Campground = require('../models/campground'),
+    Notification = require('../models/notification');
 
 
 // Root route
@@ -80,6 +81,63 @@ router.get("/logout", (req, res) => {
     req.logout();
     req.flash('success', 'You have been logged out');
     res.redirect("/campgrounds");
+});
+
+
+// FOLLOW USER
+router.get('/follow/:user_id', middleware.isLoggedIn, async (req, res) => {
+    try {
+        const user = await User.findById(req.params.user_id);
+        user.followers.push(req.user._id);
+        user.save();
+        req.flash('success', `Successfully followed ${user.username}!`);
+        res.redirect(`/users/${req.params.user_id}`);
+    }
+    catch(err) {
+        req.flash('error', err.message + ' (Error code: RT-US-FLUS)');
+        res.redirect('back');
+    }
+});
+
+
+// NOTIFICATIONS
+router.get('/notifications', middleware.isLoggedIn, async (req, res) => {
+    try {
+        const user = await User.findById(req.user._id).populate({
+            path: 'notifications',
+            options: {
+                sort: {"_id": -1}
+            }
+        }).exec();
+        const allNotifications = user.notifications;
+        res.render('notifications/index', {allNotifications});
+    }
+    catch(err) {
+        req.flash('error', err.message);
+        res.redirect('back');
+    }
+});
+
+
+// HANDLE NOTIFICATION
+router.get('/notifications/:notification_id', middleware.isLoggedIn, async (req, res) => {
+    // ?mark_read=true
+    try {
+        const notification = await Notification.findById(req.params.notification_id);
+        let mark_read = true;
+        let redirectUrl = `/campgrounds/${notification.campgroundId}`;
+        if (req.query.mark_read) {
+            mark_read = req.query.mark_read;
+            redirectUrl = `/notifications`;
+        }
+        notification.isRead = mark_read;
+        notification.save();
+        res.redirect(redirectUrl);
+    }
+    catch(err) {
+        req.flash('error', err.message);
+        res.redirect('back');
+    }
 });
 
 module.exports = router;
