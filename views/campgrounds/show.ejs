@@ -31,7 +31,7 @@
                         </a>
                     </footer>
                     <!-- Check if user is logged in AND the user is the author of the campground -->
-                    <% if(currentUser && campground.author.id.equals(currentUser._id) || currentUser && currentUser.isAdmin) { %>
+                    <% if(currentUser && campground.author && campground.author.id && campground.author.id.equals(currentUser._id) || currentUser && currentUser.isAdmin) { %>
                     <a class="btn btn-warning mt-3 text-white btn-sm" href="/campgrounds/<%= campground._id %>/edit">Edit</a>
                     <form action="/campgrounds/<%= campground._id %>?_method=DELETE" method="POST" class="d-inline ml-3">
                         <button type="submit" class="btn btn-danger mt-3 text-white btn-sm">Delete</button>

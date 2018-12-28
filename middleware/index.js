@@ -16,7 +16,7 @@ middlewareObj.checkCampgroundOwnership = function (req, res, next) {
                 res.redirect("back");
             } else {
                 // Check if the user owns the campground?
-                if (campground.author.id.equals(req.user._id) || req.user.isAdmin) {
+                if (campground && campground.author && campground.author.id && campground.author.id.equals(req.user._id) || req.user.isAdmin) {
                     next();
                 } else {
                     // Error if not authorized
