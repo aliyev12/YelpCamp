@@ -58,6 +58,7 @@ const geocoder = NodeGeocoder(options);
 
 // INDEX - Show all campgrounds
 router.get("/", async (req, res) => {
+    try {
     // Declare a variable that will hold find option for pulling campgrounds
     let regex;
     // If there is a search query...
@@ -70,7 +71,7 @@ router.get("/", async (req, res) => {
     } else {
         regex = {};
     }
-    try {
+    
         // Count total number of campgrounds
         const count = await Campground.count(regex).exec();
         if (!count) {

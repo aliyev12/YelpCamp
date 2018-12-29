@@ -1,3 +1,6 @@
+# Temporarily disabing registration page for test deployment
+register.ejs
+
 # !!! IGNORE ENVIRONMENT FILE!
 .env
 *.env
