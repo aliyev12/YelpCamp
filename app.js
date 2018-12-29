@@ -35,6 +35,8 @@ mongoose.connect(
     useNewUrlParser: true
   }
 );
+
+
 // Activate body parser to be able to read request body data
 app.use(
   bodyParser.urlencoded({
