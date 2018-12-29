@@ -57,7 +57,7 @@ const geocoder = NodeGeocoder(options);
 /*=========================================*/
 
 // INDEX - Show all campgrounds
-router.get("/", (req, res) => {
+router.get("/", async (req, res) => {
     // Declare a variable that will hold find option for pulling campgrounds
     let regex;
     // If there is a search query...
@@ -70,93 +70,81 @@ router.get("/", (req, res) => {
     } else {
         regex = {};
     }
-
-    // Count total number of campgrounds
-    Campground.count(regex).exec((err, count) => {
-        if (err) {
-            req.flash('error', err.message);
-            res.redirect('/');
+    try {
+        // Count total number of campgrounds
+        const count = await Campground.count(regex).exec();
+        if (!count) {
+            req.flash('error', 'Something went wrong (Error code: RT-CM-IN)');
+            return res.redirect('/');
         }
-        //  else if (!count) {
-        //     if (req.query.search) {
-        //         req.flash('error', 'test');
-        //         res.redirect('/campgrounds');
-        //     }
-        // } 
-        else {
-            const perPageAllowedValues = [1, 4, 6, 8, 12, 16, 20, 50, 100, parseInt(count)];
-            const validatePerPageQuery = perPageAllowedValues.some(el => el === parseInt(req.query.per_page));
-            // If someone tries to modify URL per_page query, display error and redirect to landing page
-            if (req.query.per_page && !validatePerPageQuery) {
-                req.flash('error', `Don't try modifying URL. Use per page dropdown to set number of items per page`);
-                return res.redirect('/');
-            }
+        const perPageAllowedValues = [1, 4, 6, 8, 12, 16, 20, 50, 100, parseInt(count)];
+        const validatePerPageQuery = perPageAllowedValues.some(el => el === parseInt(req.query.per_page));
+        // If someone tries to modify URL per_page query, display error and redirect to landing page
+        if (req.query.per_page && !validatePerPageQuery) {
+            req.flash('error', `Don't try modifying URL. Use per page dropdown to set number of items per page`);
+            return res.redirect('/');
+        }
 
-            let perPage;
-            // If there is a query per_page, set perPage to be that query if it meets requirements...
-            if (req.query.per_page) {
-                const perPageQuery = parseInt(req.query.per_page);
-                // perPage = perPageQuery ? perPageQuery <= count : count;
-                if (perPageQuery > 0 && perPageQuery <= parseInt(count)) {
-                    perPage = perPageQuery
-                } else {
-                    // Just display all campgrounds
-                    perPage = parseInt(count);
-                }
+        let perPage;
+        // If there is a query per_page, set perPage to be that query if it meets requirements...
+        if (req.query.per_page) {
+            const perPageQuery = parseInt(req.query.per_page);
+            // perPage = perPageQuery ? perPageQuery <= count : count;
+            if (perPageQuery > 0 && perPageQuery <= parseInt(count)) {
+                perPage = perPageQuery
             } else {
-                // Otherwise, set perPage to be the current count if the count is less than 8, and 8 if the count is more than 8
-                if (count >= 8) {
-                    // Default number of campgrounds per  page is no per_page query exists and/or count is less than 8
-                    perPage = 8;
-                } else {
-                    perPage = parseInt(count);
-                }
+                // Just display all campgrounds
+                perPage = parseInt(count);
             }
-            // Get page number query
-            const pageQuery = parseInt(req.query.page),
-                pageNumber = pageQuery ? pageQuery : 1;
+        } else {
+            // Otherwise, set perPage to be the current count if the count is less than 8, and 8 if the count is more than 8
+            if (count >= 8) {
+                // Default number of campgrounds per  page is no per_page query exists and/or count is less than 8
+                perPage = 8;
+            } else {
+                perPage = parseInt(count);
+            }
+        }
+        // Get page number query
+        const pageQuery = parseInt(req.query.page),
+            pageNumber = pageQuery ? pageQuery : 1;
 
-            /**================== */
-            // Get all campgrounds from DB
-            Campground.find(regex)
-                .skip((perPage * pageNumber) - perPage)
-                .limit(perPage)
-                .populate("comments")
-                .exec((err, allCampgrounds) => {
-                    if (err) {
-                        console.log(err);
-                        req.flash('error', 'Something went wrong');
-                        res.redirect('/campgrounds');
-                    } else if (!allCampgrounds) {
-                        req.flash('error', 'No campgrounds matched your search');
-                        res.redirect('/campgrounds');
-                    } else {
-                        // If someone tries to modiry URL page query to a non existant page, display error and redirect to landing page
-                        if (parseInt(req.query.page) > Math.ceil(count / perPage) || parseInt(req.query.page) <= 0) {
-                            req.flash('error', `Don't try modifying URL. Use pagination to get to the right page`);
-                            return res.redirect('/');
-                        }
-                        // Object with all variables that are being passed on to Campground's index page
-                        const dataBeingPassedToCampgroundIndexTemplate = {
-                            campgrounds: allCampgrounds,
-                            current: pageNumber,
-                            pages: Math.ceil(count / perPage),
-                            totalNumberOfCampgrounds: count,
-                            perPage
-                        };
-                        // If there is a search query, add it to object
-                        if (req.query.search) {
-                            dataBeingPassedToCampgroundIndexTemplate.search = req.query.search;
-                        } else {
-                            dataBeingPassedToCampgroundIndexTemplate.search = '';
-                        }
-                        // Render index page and pass on object with parameters below
-                        res.render("campgrounds/index", dataBeingPassedToCampgroundIndexTemplate);
-                    }
-                }); // end find
-
-        } // end if Campground.count no errors
-    }); // count used to end
+        /**================== */
+        // Get all campgrounds from DB
+        const allCampgrounds = await Campground.find(regex)
+            .skip((perPage * pageNumber) - perPage)
+            .limit(perPage)
+            .populate("comments")
+            .exec();
+        if (!allCampgrounds) {
+            req.flash('error', 'No campgrounds matched your search');
+            return res.redirect('/campgrounds');
+        }
+        // If someone tries to modiry URL page query to a non existant page, display error and redirect to landing page
+        if (parseInt(req.query.page) > Math.ceil(count / perPage) || parseInt(req.query.page) <= 0) {
+            req.flash('error', `Don't try modifying URL. Use pagination to get to the right page`);
+            return res.redirect('/');
+        }
+        // Object with all variables that are being passed on to Campground's index page
+        const dataBeingPassedToCampgroundIndexTemplate = {
+            campgrounds: allCampgrounds,
+            current: pageNumber,
+            pages: Math.ceil(count / perPage),
+            totalNumberOfCampgrounds: count,
+            perPage
+        };
+        // If there is a search query, add it to object
+        if (req.query.search) {
+            dataBeingPassedToCampgroundIndexTemplate.search = req.query.search;
+        } else {
+            dataBeingPassedToCampgroundIndexTemplate.search = '';
+        }
+        // Render index page and pass on object with parameters below
+        res.render("campgrounds/index", dataBeingPassedToCampgroundIndexTemplate);
+    } catch (err) {
+        req.flash('error', err.message);
+        res.redirect('/');
+    }
 });
 
 // CREATE - Create new campground
@@ -256,17 +244,20 @@ router.get("/:id", async (req, res) => {
 });
 
 // EDIT CAMPGROUND ROUTE
-router.get('/:id/edit', middleware.checkCampgroundOwnership, (req, res) => {
-    Campground.findById(req.params.id, (err, campground) => {
-        if (err || !campground) {
+router.get('/:id/edit', middleware.checkCampgroundOwnership, async (req, res) => {
+    try {
+        const campground = await Campground.findById(req.params.id);
+        if (!campground) {
             req.flash('error', 'Campground was not found');
-            res.redirect('/campgrounds');
-        } else {
-            res.render('campgrounds/edit', {
-                campground
-            });
+            return res.redirect('/campgrounds');
         }
-    });
+        res.render('campgrounds/edit', {
+            campground
+        });
+    } catch (err) {
+        req.flash('error', err.message);
+        res.redirect('/campgrounds');
+    }
 });
 
 // UPDATE CAMPGROUND ROUTE
@@ -329,53 +320,6 @@ router.put('/:id', middleware.checkCampgroundOwnership, upload.single('image'), 
             campground.save();
             req.flash("success", "Successfully Updated!");
             res.redirect("/campgrounds/" + campground._id);
-
-            // // Checking if location changed. If changed then geocode
-            // if (campground.location !== req.body.location) {
-            //     geocoder.geocode(req.body.location, (err, data) => {
-            //         if (err) {
-            //             req.flash('error', err.message);
-            //             return res.redirect('back');
-            //         } else if (!data) {
-            //             req.flash('error', 'Invalid Address');
-            //             return res.redirect('back');
-            //         } else if (!data.length) {
-            //             req.flash('error', 'Invalid Address');
-            //             return res.redirect('back');
-            //         }
-
-            //         req.body.campground.lat = data[0].latitude;
-            //         req.body.campground.lng = data[0].longitude;
-            //         req.body.campground.location = data[0].formattedAddress;
-            //         req.body.campground.city = data[0].city;
-            //         req.body.campground.country = data[0].country;
-            //     // eval(require('locus'));
-            //     // Find and update the correct campground
-            //     Campground.findByIdAndUpdate(req.params.id, req.body.campground, (err, updatedCampground) => {
-            //         if (err) {
-            //             req.flash('error', 'Error while updating campground');
-            //             res.redirect('/campgrounds');
-            //         } else {
-            //             // Redirect back to campground show page
-            //             req.flash('success', 'Successfully updated campground');
-            //             res.redirect(`/campgrounds/${updatedCampground._id}`);
-            //         }
-            //     });
-            // });
-            // // If location has not changed, don't geocode
-            // } else {
-            //     // Find and update the correct campground
-            //     Campground.findByIdAndUpdate(req.params.id, req.body.campground, (err, updatedCampground) => {
-            //         if (err) {
-            //             req.flash('error', 'Error while updating campground');
-            //             res.redirect('/campgrounds');
-            //         } else {
-            //             // Redirect back to campground show page
-            //             req.flash('success', 'Successfully updated campground');
-            //             res.redirect(`/campgrounds/${updatedCampground._id}`);
-            //         }
-            //     });
-            // }
         }
     });
 });
