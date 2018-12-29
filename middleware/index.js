@@ -183,4 +183,13 @@ middlewareObj.checkIfUserIsEnabled = function (req, res, next) {
     });
 };
 
+middlewareObj.captchaVerification = function (req, res, next) {
+    if (req.recaptcha.error) {
+        req.flash('error','reCAPTCHA Incorrect');
+        res.redirect('/request');
+    } else {
+        return next();
+    }
+}
+
 module.exports = middlewareObj;

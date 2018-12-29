@@ -13,20 +13,24 @@
                         <label for="password">Password</label>
                         <input class="form-control" type="password" name="password" placeholder="Password" required>
                     </div>
+                    <% if (siteKey) { %>
+                    <div class="form-group">
+                        <div class="g-recaptcha" data-sitekey="<%= siteKey %>"></div>
+                    </div>
+                    <% } %>
                     <div class="form-group">
                         <button class="btn btn-lg btn-primary btn-block" type="submit"><i class="fas fa-sign-in-alt mr-2"></i>Login</button>
                     </div>
                 </form>
-                <a href="/forgot" class="btn btn-link d-block text-left"><i class="fas fa-unlock mr-2"></i>Forgot password</a>
-                <a href="/campgrounds" class="btn btn-link d-block text-left"><i class="fa fa-arrow-left mr-2" aria-hidden="true"></i>Go
+                <a href="/forgot" class="btn btn-link d-block text-left"><i class="fas fa-unlock mr-2"></i>Forgot
+                    password</a>
+                <a href="/campgrounds" class="btn btn-link d-block text-left"><i class="fa fa-arrow-left mr-2"
+                        aria-hidden="true"></i>Go
                     Back</a>
             </div>
         </div>
-
     </div>
 </div>
-
-
 
 
 <% include ./partials/footer %>

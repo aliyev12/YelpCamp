@@ -4,9 +4,15 @@ const express = require("express"),
     passport = require('passport'),
     middleware = require('../middleware/index'),
     nodemailer = require('nodemailer'),
-    User = require('../models/user'),
+    request = require('request');
+User = require('../models/user'),
     Campground = require('../models/campground'),
     Notification = require('../models/notification');
+
+const Recaptcha = require('express-recaptcha').Recaptcha;
+//import Recaptcha from 'express-recaptcha'
+const recaptcha = new Recaptcha(process.env.RECAPTCHA_SITE_KEY, process.env.RECAPTCHA_SECRET_KEY);
+
 
 
 // Root route
@@ -65,11 +71,17 @@ router.get("/register", (req, res) => res.render("register"));
 
 // REQUEST NEW ACCOUNT - GET
 router.get('/request', (req, res) => {
-    res.render('request-account');
+    res.render('request-account', {
+        captcha: res.recaptcha,
+        siteKey: process.env.RECAPTCHA_SITE_KEY
+    });
 });
 
 // REQUEST NEW ACCOUNT - POST
-router.post('/request', async (req, res) => {
+router.post('/request', 
+recaptcha.middleware.verify,
+middleware.captchaVerification,
+async (req, res) => {
     try {
         // Specify mail provider and set email & password
         const smtpTransport = await nodemailer.createTransport({
@@ -125,11 +137,16 @@ router.post('/request', async (req, res) => {
 
 
 //Show login form
-router.get("/login", (req, res) => res.render("login"));
+router.get("/login", recaptcha.middleware.render, (req, res) => res.render("login", {
+    captcha: res.recaptcha,
+    siteKey: process.env.RECAPTCHA_SITE_KEY
+}));
 
 // Handling login logic
 router.post(
     "/login",
+    recaptcha.middleware.verify,
+    middleware.captchaVerification,
     middleware.checkIfUserIsEnabled,
     passport.authenticate("local", {
         successRedirect: "/campgrounds",
