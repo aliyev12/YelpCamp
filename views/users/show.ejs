@@ -6,7 +6,16 @@
             <h1>
                 <%= `${user.firstName} ${user.lastName}` %>
             </h1>
-            <a href="/users/<%= user._id %>/edit" class="btn btn-outline-dark my-3"><i class="fas fa-user-edit mr-2"></i>Edit Account</a>
+            <div>
+                <% if (currentUser && currentUser._id.equals(user._id) || currentUser.isAdmin) { %>
+                <a href="/users/<%= user._id %>/edit" class="btn btn-outline-dark my-3"><i class="fas fa-user-edit mr-2"></i>Edit
+                    <%= currentUser.isAdmin ? ' ' + user.username + '\'s' : '' %> Account
+                    <%= currentUser.isAdmin ? ' as Admin' : '' %></a>
+                <% } %>
+            </div>
+            <div>
+                <a href="/follow/<%= user._id %>" class="btn btn-outline-success mb-3"><i class="far fa-bell mr-2"></i>Follow</a>
+            </div>
         </div>
     </div>
     <div class="row">

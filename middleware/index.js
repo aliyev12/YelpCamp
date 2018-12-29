@@ -121,28 +121,31 @@ middlewareObj.checkReviewOwnership = function (req, res, next) {
 
 };
 
-middlewareObj.checkUserProfileOwnership = function (req, res, next) {
-    // Check if user is logged in
-    if (req.isAuthenticated()) {
-        User.findById(req.params.user_id, (err, user) => {
-            if (err || !user) {
+middlewareObj.checkUserProfileOwnership = async function (req, res, next) {
+    try {
+        // Check if user is logged in
+        if (req.isAuthenticated()) {
+            const user = await User.findById(req.params.user_id);
+            if (!user) {
                 req.flash('error', 'User not found (Error code: MDL-CHUOW-01)');
-                res.redirect('/campgrounds');
-            } else {
-                // Check if user ID is the same as the currently logged in user ID
-                if (user._id.equals(req.user._id) || req.user.isAdmin) {
-                    next();
-                } else {
-                    // User is not the owner of profile, so the user is not authorized to modify it
-                    req.flash('error', `You don't have permission to do that`);
-                    res.redirect(`/`);
-                }
+                return res.redirect('/campgrounds');
             }
-        });
-    } else {
-        // User is not logged in, so display error message and redirect to login page
-        req.flash('err', 'You need to be logged in to do that');
-        res.redirect('/login');
+            // Check if user ID is the same as the currently logged in user ID
+            if (user._id.equals(req.user._id) || req.user.isAdmin) {
+                next();
+            } else {
+                // User is not the owner of profile, so the user is not authorized to modify it
+                req.flash('error', `You don't have permission to do that`);
+                return res.redirect(`/`);
+            }
+        } else {
+            // User is not logged in, so display error message and redirect to login page
+            req.flash('err', 'You need to be logged in to do that');
+            return res.redirect('/login');
+        }
+    } catch (err) {
+        req.flash('error', err.message);
+        return res.redirect('/campgrounds');
     }
 };
 
@@ -163,7 +166,9 @@ middlewareObj.checkIfUserIsAdmin = function (req, res, next) {
 };
 
 middlewareObj.checkIfUserIsEnabled = function (req, res, next) {
-    User.findOne({username: req.body.username}, (err, user) => {
+    User.findOne({
+        username: req.body.username
+    }, (err, user) => {
         if (err || !user) {
             req.flash('error', 'User not found');
             res.redirect('/login');

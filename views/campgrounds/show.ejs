@@ -8,7 +8,9 @@
                 <li class="list-group-item">Info 1</li>
                 <li class="list-group-item">Info 1</li>
             </div>
-            <h1 class="display-4 text-info font-italic mt-3"><%= campground.city %></h1>
+            <h1 class="display-4 text-info font-italic mt-3">
+                <%= campground.city %>
+            </h1>
             <div id="map"></div>
         </div>
         <div class="col-md-9">
@@ -23,17 +25,27 @@
                     <p class="card-text">
                         <%= campground.description %>
                     </p>
-                    <footer class="blockquote-footer">Submitted by 
+                    <footer class="blockquote-footer">Submitted by
+                        <% if (author && author.enabled && author.username) { %>
                         <a href="/users/<%= campground.author.id %>">
                             <cite title="Source Title">
-                                <%= campground.author.username %>
+                                <strong><%= author.username %></strong>
                             </cite>
                         </a>
+                        <% } else { %>
+                        <span class="text-muted">
+                            <cite title="Source Title">
+                                <strong><%= campground.author.username %></strong> (This user is currently inactive)
+                            </cite>
+                        </span>
+                        <% } %>
+
                     </footer>
                     <!-- Check if user is logged in AND the user is the author of the campground -->
                     <% if(currentUser && campground.author && campground.author.id && campground.author.id.equals(currentUser._id) || currentUser && currentUser.isAdmin) { %>
                     <a class="btn btn-warning mt-3 text-white btn-sm" href="/campgrounds/<%= campground._id %>/edit">Edit</a>
-                    <form action="/campgrounds/<%= campground._id %>?_method=DELETE" method="POST" class="d-inline ml-3">
+                    <form action="/campgrounds/<%= campground._id %>?_method=DELETE" method="POST" class="d-inline ml-3"
+                        onsubmit="return confirm('Are you sure you want to delete this campground?');">
                         <button type="submit" class="btn btn-danger mt-3 text-white btn-sm">Delete</button>
                     </form>
                     <% } %>
@@ -84,7 +96,7 @@
                             <% if (currentUser && review.author.id.equals(currentUser._id) || currentUser && currentUser.isAdmin) { %>
                             <a class="btn btn-warning btn-sm" href="/campgrounds/<%= campground._id %>/reviews/<%= review._id %>/edit">Edit</a>
                             <form action="/campgrounds/<%= campground._id %>/reviews/<%= review._id %>?_method=DELETE"
-                                method="POST" class="d-inline ml-3" id="delete-form">
+                                method="POST" class="d-inline ml-3" id="delete-form" onsubmit="return confirm('Are you sure you want to delete this review?');">
                                 <button class="btn btn-danger btn-sm" id="delete-review-btn">Delete</button>
                             </form>
                             <% } %>
@@ -199,7 +211,7 @@
 
                             <!--Delete comment button-->
                             <form action="/campgrounds/<%= campground._id %>/comments/<%= comment._id %>?_method=DELETE"
-                                method="POST" class="d-inline ml-3">
+                                method="POST" class="d-inline ml-3" onsubmit="return confirm('Are you sure you want to delete this comment?');">
                                 <button class="btn btn-danger btn-sm">Delete</button>
                             </form>
 

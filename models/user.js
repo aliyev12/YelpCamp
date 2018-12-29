@@ -26,7 +26,17 @@ const userSchema = new mongoose.Schema({
     enabled: {
         type: Boolean,
         default: true
-    }
+    },
+    followers: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+    }],
+    notifications: [
+        {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: 'Notification'
+        }
+    ]
 });
 
 userSchema.plugin(passportLocalMongoose);
