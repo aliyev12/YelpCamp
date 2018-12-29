@@ -96,4 +96,4 @@ app.use('/users', userRoutes);
 
 
 /*== RUN SERVER ==*/
-app.listen(process.env.PORT, process.env.IP, () => console.log("Server running..."));
+app.listen(process.env.PORT, () => console.log("Server running..."));
