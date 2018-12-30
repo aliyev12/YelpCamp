@@ -74,10 +74,6 @@ router.get("/", async (req, res) => {
     
         // Count total number of campgrounds
         const count = await Campground.count(regex).exec();
-        if (!count) {
-            req.flash('error', 'Something went wrong (Error code: RT-CM-IN)');
-            return res.redirect('/');
-        }
         const perPageAllowedValues = [1, 4, 6, 8, 12, 16, 20, 50, 100, parseInt(count)];
         const validatePerPageQuery = perPageAllowedValues.some(el => el === parseInt(req.query.per_page));
         // If someone tries to modify URL per_page query, display error and redirect to landing page

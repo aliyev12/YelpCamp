@@ -4,16 +4,14 @@ const express = require("express"),
     passport = require('passport'),
     middleware = require('../middleware/index'),
     nodemailer = require('nodemailer'),
-    request = require('request');
-User = require('../models/user'),
+    request = require('request'),
+    User = require('../models/user'),
     Campground = require('../models/campground'),
     Notification = require('../models/notification');
 
 const Recaptcha = require('express-recaptcha').Recaptcha;
 //import Recaptcha from 'express-recaptcha'
 const recaptcha = new Recaptcha(process.env.RECAPTCHA_SITE_KEY, process.env.RECAPTCHA_SECRET_KEY);
-
-
 
 // Root route
 router.get("/", (req, res) => {
@@ -78,25 +76,25 @@ router.get('/request', (req, res) => {
 });
 
 // REQUEST NEW ACCOUNT - POST
-router.post('/request', 
-recaptcha.middleware.verify,
-middleware.captchaVerification,
-async (req, res) => {
-    try {
-        // Specify mail provider and set email & password
-        const smtpTransport = await nodemailer.createTransport({
-            service: 'Gmail',
-            auth: {
-                user: process.env.YELPCAMP2019_GMAIL_ADDRESS,
-                pass: process.env.YELPCAMP2019_GMAIL_PASSWORD
-            }
-        });
-        // Set mail options for user: receiver, subject, email body etc...
-        const mailOptionsToUser = {
-            to: req.body.email,
-            from: process.env.YELPCAMP2019_GMAIL_ADDRESS,
-            subject: `New Account Request`,
-            text: `
+router.post('/request',
+    recaptcha.middleware.verify,
+    middleware.captchaVerification,
+    async (req, res) => {
+        try {
+            // Specify mail provider and set email & password
+            const smtpTransport = await nodemailer.createTransport({
+                service: 'Gmail',
+                auth: {
+                    user: process.env.YELPCAMP2019_GMAIL_ADDRESS,
+                    pass: process.env.YELPCAMP2019_GMAIL_PASSWORD
+                }
+            });
+            // Set mail options for user: receiver, subject, email body etc...
+            const mailOptionsToUser = {
+                to: req.body.email,
+                from: process.env.YELPCAMP2019_GMAIL_ADDRESS,
+                subject: `New Account Request`,
+                text: `
             Thank you for requesting a new account for YelpCamp! Your request has been successfully sent to site admin.
             We'll review your request and reach out to you shortly. 
             Please, see the content of your request below:
@@ -106,13 +104,13 @@ async (req, res) => {
             ---
             ${req.body.description}
             `
-        };
-        // Set mail options for admin: receiver, subject, email body etc...
-        const mailOptionsToAdmin = {
-            to: process.env.YELPCAMP2019_GMAIL_ADDRESS,
-            from: process.env.YELPCAMP2019_GMAIL_ADDRESS,
-            subject: `New Account Request`,
-            text: `
+            };
+            // Set mail options for admin: receiver, subject, email body etc...
+            const mailOptionsToAdmin = {
+                to: process.env.YELPCAMP2019_GMAIL_ADDRESS,
+                from: process.env.YELPCAMP2019_GMAIL_ADDRESS,
+                subject: `New Account Request`,
+                text: `
             New account for YelpCamp has been requested by ${req.body.firstName} ${req.body.lastName}.
             See the content of your request below:
             First Name: ${req.body.firstName};
@@ -121,19 +119,19 @@ async (req, res) => {
             ---
             ${req.body.description}
             `
-        };
-        // Send mail to user
-        await smtpTransport.sendMail(mailOptionsToUser);
-        // Send mail to admin
-        await smtpTransport.sendMail(mailOptionsToAdmin);
-        req.flash('success', `An e-mail has been successfully sent to site admin.`);
-        res.redirect('/campgrounds');
-    } catch (err) {
-        console.log(err);
-        req.flash('error', `Something went wrong while requesting your account. Please, contact site admin for assistance if this error persists.`);
-        res.redirect('/campgrounds');
-    }
-});
+            };
+            // Send mail to user
+            await smtpTransport.sendMail(mailOptionsToUser);
+            // Send mail to admin
+            await smtpTransport.sendMail(mailOptionsToAdmin);
+            req.flash('success', `An e-mail has been successfully sent to site admin.`);
+            res.redirect('/campgrounds');
+        } catch (err) {
+            console.log(err);
+            req.flash('error', `Something went wrong while requesting your account. Please, contact site admin for assistance if this error persists.`);
+            res.redirect('/campgrounds');
+        }
+    });
 
 
 //Show login form

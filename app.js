@@ -25,16 +25,8 @@ const campgroundRoutes = require("./routes/campgrounds"),
 // // For development only, prepopulate sample data
 // seedDB();
 
-
 // Connect to mango database
-mongoose.connect(
-  `mongodb+srv://${process.env.DB_USER}:${
-    process.env.DB_PASSWORD
-  }@cluster0-fxbxa.mongodb.net/${process.env.DB_NAME}`,
-  {
-    useNewUrlParser: true
-  }
-);
+mongoose.connect(process.env.DATABASEURL,{useNewUrlParser: true});
 
 
 // Activate body parser to be able to read request body data
